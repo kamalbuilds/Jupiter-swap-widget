@@ -2,6 +2,9 @@ import type { NextPage } from "next";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { useWallet } from "@solana/wallet-adapter-react";
+import TokenModal from "./components/TokenModal";
+import Payments from "./components/Payments/Payments";
 
 // Default styles that can be overridden by your app
 require("@solana/wallet-adapter-react-ui/styles.css");
@@ -19,7 +22,11 @@ const Home: NextPage = () => {
   // const { program } = useProgram(
   //   your_nft_collection_address,
   //   "nft-collection"
+
   // );
+
+  const wallet = useWallet();
+  console.log("Wallet", wallet)
 
   return (
     <>
@@ -59,6 +66,14 @@ const Home: NextPage = () => {
         </p>
 
         <WalletMultiButtonDynamic />
+
+        <div>
+          <TokenModal />
+        </div>
+
+
+
+        <Payments />
       </div>
     </>
   );
