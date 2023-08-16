@@ -14,15 +14,15 @@ const Swap = () => {
 
     // const [indexedRouteMap,setIndexedRouteMap] = useState();
 
-    const connection = new Connection('https://solana-devnet.g.alchemy.com/v2/QIb7Svucv2br6JObOnHw4GsPriYmdXYY');
+    const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/SW3uzyu7hPsAhI5878T7jffYghoOuDLk');
 
     // const walletS = new wallet(Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')));
 
 
-    const walletS = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
+    const walletS = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || '')).publicKey;
 
 
-    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
+    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''))
 
     console.log("wallets", walletS, signer)
 
@@ -56,6 +56,7 @@ const Swap = () => {
         // Object.keys(indexedRouteMap['indexedRouteMap']).forEach((key, index) => {
         //     generatedRouteMap[getMint(indexedRouteMap, key)] = indexedRouteMap["indexedRouteMap"][key].map((index) => getMint(indexedRouteMap, index))
         // });
+       
 
         // console.log("Generated Txn", generatedRouteMap, indexedRouteMap);
 
@@ -64,7 +65,7 @@ const Swap = () => {
         // const swappableOutputForSOL = generatedRouteMap['So11111111111111111111111111111111111111112'];
 
         const { data } = await (
-            await fetch('https://quote-api.jup.ag/v4/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=10'
+            await fetch('https://quote-api.jup.ag/v4/quote?inputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&outputMint=So11111111111111111111111111111111111111112&amount=5000'
             )
         ).json();
 
@@ -107,6 +108,7 @@ const Swap = () => {
         // });
 
         const transactionBuf = Buffer.from(swapTransaction, 'base64');
+
         var transaction = VersionedTransaction.deserialize(transactionBuf);
 
         console.log(transaction, "sign txn start");
