@@ -9,9 +9,6 @@ import fetch from 'cross-fetch';
 import { Wallet } from '@project-serum/anchor';
 import bs58 from 'bs58';
 
-
-// curl -s 'https://quote-api.jup.ag/v4/quote?inputMint=mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=5000000&swapMode=ExactOut&slippageBps=1' | jq '.data | .[0] | .inAmount, .otherAmountThreshold'
-
 const Payments = () => {
 
     const [tokenOne, setTokenOne] = useState(

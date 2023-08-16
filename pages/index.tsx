@@ -5,6 +5,7 @@ import styles from "../styles/Home.module.css";
 import { useWallet } from "@solana/wallet-adapter-react";
 import TokenModal from "./components/TokenModal";
 import Payments from "./components/Payments/Payments";
+import Swap from "./components/swap/swap";
 
 // Default styles that can be overridden by your app
 require("@solana/wallet-adapter-react-ui/styles.css");
@@ -26,7 +27,7 @@ const Home: NextPage = () => {
   // );
 
   const wallet = useWallet();
-  console.log("Wallet", wallet)
+  // console.log("Wallet", wallet)
 
   return (
     <>
@@ -73,7 +74,8 @@ const Home: NextPage = () => {
 
 
 
-        <Payments />
+        {/* <Payments /> */}
+        <Swap />
       </div>
     </>
   );
