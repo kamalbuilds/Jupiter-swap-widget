@@ -1,23 +1,16 @@
+// @ts-nocheck
 import { Button, Input, InputGroup, InputLeftAddon, InputLeftElement, InputRightElement, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import "../../styles/Home.module.css";
 import TokenList from './TokenList';
 import { useClickAway } from 'react-use';
-
-
 import { AiOutlineDown } from "react-icons/ai";
 import { MdSwapVerticalCircle } from "react-icons/md";
-
 
 //Jupiter Imports
 import { Connection, Keypair, VersionedTransaction } from '@solana/web3.js';
 import fetch from 'cross-fetch';
-import { Wallet } from '@project-serum/anchor';
-import bs58 from 'bs58';
-import * as anchor from '@project-serum/anchor';
-import Image from 'next/image';
-import { toast } from 'react-toastify';
-
+import { useWallet } from '@solana/wallet-adapter-react';
 
 
 const SwapTokens = ({ tokenList }: any) => {
@@ -33,11 +26,11 @@ const SwapTokens = ({ tokenList }: any) => {
     const [loading, setLoading] = useState(false);
     const [tokenFocus, setTokenFocus] = useState(false);
 
-    // const [tokenOnePriceUSD, setTokenOnePriceUSD] = useState(0);
-    // const [tokenTwoPriceUSD, setTokenTwoPriceUSD] = useState(0);
-
-
     const [changeToken, setChangeToken] = useState(1);
+
+    const wallet = useWallet();
+    const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/SW3uzyu7hPsAhI5878T7jffYghoOuDLk');
+
 
     const openTokenModal = () => {
         onOpen();
@@ -51,51 +44,25 @@ const SwapTokens = ({ tokenList }: any) => {
 
     const changeTokenOneAmount = (v: string) => {
         const value = parseInt(v);
-        if (value <= 0 || v === '') {
-            setTokenTwoAmount(0);
-            setTokenOneAmount(value);
-            // setTokenOnePriceUSD(0);
-        } else {
-            const decimalValue = Math.pow(10, tokenOne.decimals);
-            console.log(decimalValue, tokenOne.decimals)
-            const fixAmount = value * decimalValue;
-
-            setTokenOneAmount(value);
-            fetchTokenPrice(fixAmount);
-        }
-
+        setTokenOneAmount(value);
+        fetchTokenPrice(value, tokenOne, tokenTwo);
 
     }
 
-    // const getUSDCPrice = async (id: string) => {
-    //     const baseURL = 'https://quote-api.jup.ag/v4/price?';
-    //     const url = baseURL + `ids=${id}`;
-
-    //     const response = await (await fetch(url)).json();
-    //     console.log("Token PRice in usdc", response);
-
-    //     const { data } = response;
-    //     const dataValues: any = Object.values(data);
-
-    //     const priceUsd = dataValues[0].price;
-    //     return priceUsd.toFixed(2);
-
-    // }
-
-    const fetchTokenPrice = async (fixAmount: number) => {
-
-
+    const fetchTokenPrice = async (value: number, tokenOne: any, tokenTwo: any) => {
         try {
+            if (value <= 0 || Number.isNaN(value)) {
+                setTokenTwoAmount(0);
+                return;
+            }
 
-            console.log("Fix Amount in token Price <><><><>", fixAmount)
-
-            console.log("fixAmount", fixAmount);
+            const decimalValue = Math.pow(10, tokenOne.decimals);
+            const fixAmount = value * decimalValue;
 
             const tokenURL = `https://quote-api.jup.ag/v6/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
 
             const res = await fetch(tokenURL);
             const response = await res.json();
-            console.log("Response", response)
 
             const outputTokenPrice = response.outAmount;
             const decimalOutputTokenValue = Math.pow(10, tokenTwo.decimals);
@@ -111,21 +78,21 @@ const SwapTokens = ({ tokenList }: any) => {
     }
 
 
-    const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/SW3uzyu7hPsAhI5878T7jffYghoOuDLk');
 
     const swapTokensOneAndTwo = () => {
-        setTokenOne(tokenTwo);
-        setTokenTwo(tokenOne);
 
-        console.log("Change token called", tokenTwoAmount)
-        changeTokenOneAmount(tokenTwoAmount.toString());
+        const token = tokenOne;
+        const firstToken = tokenTwo;
+        const secToken = token;
+
+        setTokenOne(tokenTwo);
+        setTokenTwo(token);
+
+        setTokenOneAmount(tokenTwoAmount);
+
+        fetchTokenPrice(tokenTwoAmount, firstToken, secToken);
     }
 
-    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
-
-    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
-
-    console.log("Signer", signer, wallets, wallets.toBase58());
 
     const swapTokensData = async () => {
         if (tokenOneAmount) {
@@ -152,7 +119,7 @@ const SwapTokens = ({ tokenList }: any) => {
                         },
                         body: JSON.stringify({
                             quoteResponse: response,
-                            userPublicKey: wallets.toBase58(),
+                            userPublicKey: wallet.publicKey.toString(),
                         })
                     })
                 ).json();
@@ -165,9 +132,8 @@ const SwapTokens = ({ tokenList }: any) => {
                 const transactionBuf = Buffer.from(swapTransaction, 'base64');
                 var transaction = VersionedTransaction.deserialize(transactionBuf);
 
-                const signed = transaction.sign([signer]);
-
-                console.log("Signed transaction", signed)
+                // const signed = transaction.sign([signer]);
+                await wallet.signTransaction(transaction);
 
                 const rawTransaction = transaction.serialize()
                 const txid = await connection.sendRawTransaction(rawTransaction, {
@@ -180,18 +146,13 @@ const SwapTokens = ({ tokenList }: any) => {
                 console.log("Error", error);
             }
 
-
             setLoading(false);
 
         }
 
-
-
-
     }
 
     const handleClick = () => {
-        console.log("clicked");
         setTokenFocus(true);
     }
 
@@ -220,8 +181,6 @@ const SwapTokens = ({ tokenList }: any) => {
                 </ModalContent>
             </Modal>
 
-            {loading && <>
-                Loading...</>}
 
             <div style={
                 {
@@ -231,7 +190,7 @@ const SwapTokens = ({ tokenList }: any) => {
                 <div className='flex '>
                     <div onClick={() => openModal(1)} className='cursor-pointer'>
                         <div className='flex gap-1 items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
-                            <Image className='rounded-3xl' src={tokenOne.logoURI} alt={tokenOne.name} width={30} height={30} />
+                            <img className='rounded-3xl' src={tokenOne.logoURI} alt={tokenOne.name} width={30} height={30} />
                             {tokenOne && tokenOne.symbol}
                             <AiOutlineDown />
                         </div>
@@ -250,12 +209,6 @@ const SwapTokens = ({ tokenList }: any) => {
                                 onChange={(e) => changeTokenOneAmount(e.target.value)}
                             />
                         </div>
-                        {/* <div className='text-slate-500 text-[12px] font-bold'>
-                            ${
-                                tokenOneAmount ? (tokenOnePriceUSD * tokenOneAmount).toFixed(2) : 0
-                            }
-
-                        </div> */}
                     </span>
                 </div>
             </div>
@@ -271,7 +224,7 @@ const SwapTokens = ({ tokenList }: any) => {
 
                     <div onClick={() => openModal(2)} className='cursor-pointer'>
                         <div className='flex gap-1 items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
-                            <Image className='rounded-3xl' src={tokenTwo.logoURI} alt={tokenTwo.name} width={30} height={30} />
+                            <img className='rounded-3xl' src={tokenTwo.logoURI} alt={tokenTwo.name} width={30} height={30} />
                             {tokenTwo && tokenTwo.symbol}
                             <AiOutlineDown />
                         </div>
@@ -289,25 +242,33 @@ const SwapTokens = ({ tokenList }: any) => {
                                 disabled={true}
                             />
                         </div>
-                        {/* <div className='text-slate-500 text-[12px] font-bold'>${(tokenTwoPriceUSD * tokenTwoAmount).toFixed(2)}</div> */}
                     </span>
                 </div>
             </div>
 
 
             <div className='my-[40px]'>
-                <Button
-                    height='50px'
-                    width='100%'
-                    colorScheme='blue'
-                    mr={3}
-                    onClick={swapTokensData}>
-                    Swap
-                </Button>
+                {loading ? (
+                    <Button
+                        height='50px'
+                        width='100%'
+                        colorScheme='blue'
+                        mr={3}
+                    >Loading....</Button>
+                ) : (
+                    <Button
+                        height='50px'
+                        width='100%'
+                        colorScheme='blue'
+                        mr={3}
+                        onClick={swapTokensData}>
+                        Swap
+                    </Button>
+                )}
             </div>
 
 
-        </div>
+        </div >
     );
 };
 

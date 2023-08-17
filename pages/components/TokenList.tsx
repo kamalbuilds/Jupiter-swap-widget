@@ -22,9 +22,6 @@ const TokenList = ({
     }
 
     const handleTokenSelect = (token: any) => {
-        console.log("Token", token);
-
-        console.log("ChangeTOken", changeToken, tokenOne, tokenTwo);
 
         if (changeToken == 1) {
             if (token.address == tokenTwo.address) {

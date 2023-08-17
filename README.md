@@ -1,32 +1,10 @@
-## Solana frontend started kit
+## Jupiter Swap Widget : 1 Widget to have the: Best Price, Best UX, Best Tokens and have Access to all liquidity on Solana
 
+A widget that can be imported in any project to give it the power to Swap any token powered By Jupiter Aggregator.
 
-## Getting Started
+Under the hood we use 
 
-```
-yarn install
-yarn run dev
-```
-
-
-
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-On `pages/_app.tsx`, you'll find our `ThirdwebProvider` wrapping your app, this is necessary for our hooks to work.
-
-on `pages/index.tsx`, you'll find an example of a connect wallet button and some hooks.
-
-## Learn More
-
-To learn more about thirdweb and Next.js, take a look at the following resources:
-
-- [thirdweb React Documentation](https://docs.thirdweb.com/react) - learn about our React SDK.
-- [thirdweb TypeScript Documentation](https://docs.thirdweb.com/typescript) - learn about our JavaScript/TypeScript SDK.
-- [thirdweb Portal](https://docs.thirdweb.com) - check our guides and development resources.
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-
-You can check out [the thirdweb GitHub organization](https://github.com/thirdweb-dev) - your feedback and contributions are welcome!
-
-## Join our Discord!
-
-For any questions, suggestions, join our discord at [https://discord.gg/thirdweb](https://discord.gg/thirdweb).
+1. Token List API: To Get validated tokens in your Widget
+2. Price API: To Get on-chain prices for all the tokens in the Widget
+3. V6 Swap API (Beta) : To get the Best in Price Swaps
+4. Payments API : To provide developers the functionality to Convert any token to USDC in a merchant-customer model.

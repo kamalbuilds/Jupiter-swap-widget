@@ -1,7 +1,7 @@
 {
   "name": "jupiter_swap_widget",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "author": "Kamal Singh <kamalthedev7@gmail.com>",
   "description": "Efficient Jupiter Swap Widget",
   "scripts": {
@@ -16,7 +16,9 @@
   },
   "keywords": [
     "swap tokens",
-    "jupiter v6 swaps"
+    "jupiter v6 swaps",
+    "Best Price, Best UX, Best Tokens",
+    "Access to all liquidity on Solana"
   ],
   "license": "MIT",
   "bugs": {
