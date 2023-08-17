@@ -1,13 +1,28 @@
 {
-  "name": "opos_hackathon",
+  "name": "jupiter_swap_widget",
   "version": "0.1.0",
   "private": true,
+  "author": "Kamal Singh <kamalthedev7@gmail.com>",
+  "description": "Efficient Jupiter Swap Widget",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamalbuilds/Jupiter-swap-widget.git"
+  },
+  "keywords": [
+    "swap tokens",
+    "jupiter v6 swaps"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kamalbuilds/Jupiter-swap-widget/issues"
+  },
+  "homepage": "https://github.com/kamalbuilds/Jupiter-swap-widget#readme",
   "dependencies": {
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",

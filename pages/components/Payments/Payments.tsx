@@ -174,7 +174,6 @@ const Payments = () => {
     }
 
 
-
     return (
         <div>
 
