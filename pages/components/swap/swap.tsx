@@ -19,10 +19,10 @@ const Swap = () => {
     // const walletS = new wallet(Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')));
 
 
-    const walletS = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || '')).publicKey;
+    const walletS = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
 
 
-    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''))
+    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
 
     console.log("wallets", walletS, signer)
 
@@ -56,7 +56,7 @@ const Swap = () => {
         // Object.keys(indexedRouteMap['indexedRouteMap']).forEach((key, index) => {
         //     generatedRouteMap[getMint(indexedRouteMap, key)] = indexedRouteMap["indexedRouteMap"][key].map((index) => getMint(indexedRouteMap, index))
         // });
-       
+
 
         // console.log("Generated Txn", generatedRouteMap, indexedRouteMap);
 
