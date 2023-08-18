@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import "../../styles/Home.module.css"
 import { Input } from '@chakra-ui/react';
 
-const TokenList = ({ tokenList, changeToken, setTokenOne, setTokenTwo, onClose }: any) => {
-
-    console.log("tokenList", tokenList)
+const TokenList = ({
+    tokenList,
+    changeToken,
+    tokenOne,
+    setTokenOne,
+    tokenTwo,
+    setTokenTwo,
+    onClose }: any) => {
 
     const [listOfTokens, setListOfTokens] = useState(tokenList);
-
 
     const handleChange = (e: any) => {
         const value = e.target.value;
@@ -20,9 +24,17 @@ const TokenList = ({ tokenList, changeToken, setTokenOne, setTokenTwo, onClose }
     const handleTokenSelect = (token: any) => {
         console.log("Token", token);
 
+        console.log("ChangeTOken", changeToken, tokenOne, tokenTwo);
+
         if (changeToken == 1) {
+            if (token.address == tokenTwo.address) {
+                setTokenTwo(tokenOne);
+            }
             setTokenOne(token);
         } else {
+            if (token.address == tokenOne.address) {
+                setTokenOne(tokenTwo);
+            }
             setTokenTwo(token);
         }
 

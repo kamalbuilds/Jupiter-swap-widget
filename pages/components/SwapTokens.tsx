@@ -12,20 +12,20 @@ import { Connection, Keypair, VersionedTransaction } from '@solana/web3.js';
 import fetch from 'cross-fetch';
 import { Wallet } from '@project-serum/anchor';
 import bs58 from 'bs58';
+import * as anchor from '@project-serum/anchor';
+
 
 
 const SwapTokens = ({ tokenList }: any) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure()
+
     const [tokenOneAmount, setTokenOneAmount] = useState(0);
     const [tokenTwoAmount, setTokenTwoAmount] = useState(0);
 
-    const [tokenOne, setTokenOne] = useState();
-    const [tokenTwo, setTokenTwo] = useState();
-    // const [isOpen, setIsOpen] = useState(false);
+    const [tokenOne, setTokenOne] = useState(tokenList[0]);
+    const [tokenTwo, setTokenTwo] = useState(tokenList[1]);
     const [changeToken, setChangeToken] = useState(1);
-    const [prices, setPrices] = useState(null);
-
 
     const openTokenModal = () => {
         onOpen();
@@ -37,18 +37,38 @@ const SwapTokens = ({ tokenList }: any) => {
     }
 
 
-
-    function changeAmount(e: any) {
+    const changeTokenOneAmount = (e: any) => {
         setTokenOneAmount(e.target.value);
-        if (e.target.value && prices) {
-            //   setTokenTwoAmount((e.target.value * prices.ratio).toFixed(2))
-        } else {
-            //   setTokenTwoAmount(null);
-            setTokenTwoAmount(0);
-        }
+        fetchTokenPrice(e.target.value);
     }
 
-    // const [tokenList, setTokenList] = useState();
+    useEffect(() => {
+        if (tokenOneAmount) {
+            fetchTokenPrice(tokenOneAmount)
+        }
+    }, [tokenOne, tokenTwo])
+
+    const fetchTokenPrice = async (amount: number) => {
+
+        const decimalValue = Math.pow(10, tokenOne.decimals);
+        console.log(decimalValue, tokenOne.decimals)
+        const fixAmount = amount * decimalValue;
+
+        console.log("fixAmount", fixAmount, decimalValue);
+
+        const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
+        const res = await fetch(tokenURL);
+        const response = await res.json();
+        console.log("Response", response)
+
+        const { data } = response;
+
+        const outputTokenPrice = data[0].outAmount;
+        const decimalOutputTokenValue = Math.pow(10, tokenTwo.decimals);
+        const totalOutputTokenValue = outputTokenPrice / decimalOutputTokenValue;
+        setTokenTwoAmount(totalOutputTokenValue);
+    }
+
 
     console.log("Token One 1111", tokenOne);
 
@@ -57,62 +77,75 @@ const SwapTokens = ({ tokenList }: any) => {
 
     const [indexRouteMap, setIndexRoutemap] = useState();
 
-    //Jupiter Functions
     const connection = new Connection('https://solana-devnet.g.alchemy.com/v2/QIb7Svucv2br6JObOnHw4GsPriYmdXYY');
 
-    // const wallet = new Wallet(Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')));
-
-    // const getMint = (index: any) => {
-    //     if (indexRouteMap) {
-    //         indexRouteMap["mintKeys"][index]
-    //     }
-
-    // };
-    // const getIndex = (mint: any) => {
-    //     if (indexRouteMap) {
-    //         indexRouteMap["mintKeys"].indexOf(mint)
-    //     }
-    // };
-
-    // const getRouteOfToken = async () => {
-    //     const indexedRouteMap = await (await fetch('https://quote-api.jup.ag/v6/indexed-route-map')).json();
-    //     // const getMint = (index) => indexedRouteMap["mintKeys"][index];
-    //     // const getIndex = (mint) => indexedRouteMap["mintKeys"].indexOf(mint);
-    //     console.log("Get Route Of Token", indexedRouteMap);
-    //     setIndexRoutemap(indexedRouteMap);
-    // }
-
-    // var generatedRouteMap = {};
-
-    // useEffect(() => {
-    //     if (indexRouteMap) {
-    //         Object.keys(indexRouteMap['indexedRouteMap']).forEach((key, index) => {
-    //             generatedRouteMap[getMint(key)] = indexRouteMap["indexedRouteMap"][key].map((index) => getMint(index))
-    //         });
-    //         const allInputMints = Object.keys(generatedRouteMap);
-    //     }
-    // }, [indexRouteMap])
-
-
-    // List all possible input tokens by mint address
-    // const swappableOutputForSOL = generatedRouteMap['So11111111111111111111111111111111111111112'];
-
-
-
-    const swapData = async () => {
-        const { data } = await (
-            await fetch('https://quote-api.jup.ag/v6/quote?inputMint=So11111111111111111111111111111111111111112\
-          &outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\
-          &amount=100000000'
-            )
-        ).json();
-        const quoteResponse = data;
-
-        console.log("Quote response: ", quoteResponse)
+    const swapTokensOneAndTwo = () => {
+        setTokenOne(tokenTwo);
+        setTokenTwo(tokenOne);
     }
 
+    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
+
+    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
+
+    console.log("Signer", signer, wallets);
+
+    const swapTokensData = async () => {
+        if (tokenOneAmount) {
+            //fetching data of the tokens
+            const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${tokenOneAmount}`;
+            const res = await fetch(tokenURL);
+            const response = await res.json();
+
+            const { data } = response;
+
+            console.log("Response", response, data);
+
+            //swapping tokens
+            const alltransactions = await (
+                await fetch('https://quote-api.jup.ag/v4/swap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // route from /quote api
+                        route: data[0],
+                        userPublicKey: wallets.toBase58(),
+                    })
+                })
+            ).json();
+            const {
+                swapTransaction,
+                setupTransaction,
+                cleanupTransaction,
+            } = alltransactions;
+
+            console.log("Swap transactions", swapTransaction, alltransactions);
+
+            const transactionBuf = Buffer.from(swapTransaction, 'base64');
+            var transaction = VersionedTransaction.deserialize(transactionBuf);
+
+            console.log(transaction, "sign txn start");
+
+            const signed = transaction.sign([signer]);
+
+            console.log("Signed transaction", signed)
+
+            const rawTransaction = transaction.serialize()
+            const txid = await connection.sendRawTransaction(rawTransaction, {
+                skipPreflight: true,
+                maxRetries: 2
+            });
+            await connection.confirmTransaction(txid);
+            console.log(`https://solscan.io/tx/${txid}`);
+
+        }
 
 
+
+
+    }
 
     return (
         <div>
@@ -123,7 +156,14 @@ const SwapTokens = ({ tokenList }: any) => {
                     <ModalHeader>Modal Title</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody className='overflow-scroll'>
-                        <TokenList tokenList={tokenList} changeToken={changeToken} setTokenOne={setTokenOne} setTokenTwo={setTokenTwo} onClose={onClose} />
+                        <TokenList
+                            tokenList={tokenList}
+                            changeToken={changeToken}
+                            tokenOne={tokenOne}
+                            setTokenOne={setTokenOne}
+                            tokenTwo={tokenTwo}
+                            setTokenTwo={setTokenTwo}
+                            onClose={onClose} />
                     </ModalBody>
 
                     <ModalFooter>
@@ -142,11 +182,11 @@ const SwapTokens = ({ tokenList }: any) => {
                         <AiOutlineDown />
                     </div>
                 </InputLeftAddon>
-                <Input type='number' height='100%' placeholder='0' />
+                <Input type='number' height='100%' placeholder='0' onChange={(e) => changeTokenOneAmount(e)} />
             </InputGroup>
 
             <div className='flex justify-center'>
-                <MdSwapVerticalCircle size='40px' />
+                <MdSwapVerticalCircle size='40px' onClick={swapTokensOneAndTwo} />
             </div>
 
             <InputGroup height='55px' mt='10px'>
@@ -156,12 +196,18 @@ const SwapTokens = ({ tokenList }: any) => {
                         <AiOutlineDown />
                     </div>
                 </InputLeftAddon>
-                <Input type='number' height='100%' placeholder='0' />
+                <Input
+                    value={tokenTwoAmount}
+                    disabled={true} type='number' height='100%' placeholder='0' />
             </InputGroup>
 
 
             <div className='my-3'>
-                <Button width='100%' colorScheme='blue' mr={3} onClick={swapData}>
+                <Button
+                    width='100%'
+                    colorScheme='blue'
+                    mr={3}
+                    onClick={swapTokensData}>
                     Swap
                 </Button>
             </div>
