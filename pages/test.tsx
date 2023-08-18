@@ -27,7 +27,7 @@ const Test = () => {
   const recieverWallet = new PublicKey("Fu3MGReA4T5qLH9v2XuJWhK1SdacWzd7E8p6uLZcHcaR");
 
   // signer pvt key 
-  // const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode(process.env.senderWallet || ''));
+  const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode(process.env.senderWallet || '')); // sender wallet pvt key
 
   const testing = async () => {
     // console.log(signer, 'sig')
@@ -121,18 +121,18 @@ const Test = () => {
     // compile the message and update the transaction
     transaction.message = message.compileToV0Message(addressLookupTableAccounts);
 
-    // ...Send to Alice to sign then send the transaction
-    // await transaction.sign([signer]);
+    ...Send to Alice to sign then send the transaction
+    await transaction.sign([signer]);
 
-    // // console.log("Signed transaction", signed)
+    // console.log("Signed transaction", signed)
 
-    // const rawTransaction = transaction.serialize()
-    // const txid = await connection.sendRawTransaction(rawTransaction, {
-    //   skipPreflight: true,
-    //   maxRetries: 2
-    // });
-    // await connection.confirmTransaction(txid);
-    // console.log(`https://solscan.io/tx/${txid}`);
+    const rawTransaction = transaction.serialize()
+    const txid = await connection.sendRawTransaction(rawTransaction, {
+      skipPreflight: true,
+      maxRetries: 2
+    });
+    await connection.confirmTransaction(txid);
+    console.log(`https://solscan.io/tx/${txid}`);
   }
 
 
