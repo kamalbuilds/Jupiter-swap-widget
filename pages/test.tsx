@@ -1,12 +1,13 @@
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token'; // version 0.1.x
-import { AddressLookupTableAccount, Connection, Keypair, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, Keypair, MessageV0, PublicKey, TransactionMessage, VersionedTransaction  } from '@solana/web3.js';
 import * as anchor from '@project-serum/anchor';
 import bs58 from 'bs58';
 import { Button } from '@chakra-ui/react';
 import { useWallet } from '@solana/wallet-adapter-react';
-
+import { web3 } from '@project-serum/anchor';
 const Test = () => {
-
+  const wallet = useWallet();
+  console.log("Wallet", wallet);
   const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
   const paymentAmount = 1_000; // 0.001 USDC
 
@@ -27,7 +28,7 @@ const Test = () => {
   const recieverWallet = new PublicKey("Fu3MGReA4T5qLH9v2XuJWhK1SdacWzd7E8p6uLZcHcaR");
 
   // signer pvt key 
-  const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode(process.env.senderWallet || '')); // sender wallet pvt key
+  const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''));
 
   const testing = async () => {
     // console.log(signer, 'sig')
@@ -90,15 +91,13 @@ const Test = () => {
     const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
     var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
-    const kamal = transaction
-    console.log(transaction);
-
     // get address lookup table accounts
     const addressLookupTableAccounts = await Promise.all(
       transaction.message.addressTableLookups.map(async (lookup) => {
         return new AddressLookupTableAccount({
           key: lookup.accountKey,
-          state: AddressLookupTableAccount.deserialize(await connection.getAccountInfo(lookup.accountKey).then((res) => res.data)),
+          state: AddressLookupTableAccount.deserialize(await connection.getAccountInfo(lookup.accountKey)
+          .then((res) => res.data)),
         });
       })
     );
@@ -118,15 +117,25 @@ const Test = () => {
     );
 
     console.log(message, "msg")
+    
     // compile the message and update the transaction
-    transaction.message = message.compileToV0Message(addressLookupTableAccounts);
+    const messagev0 = message.compileToV0Message(addressLookupTableAccounts);
+    const newtransaction = new web3.VersionedTransaction(messagev0);
+    // ...Send to Alice to sign then send the transaction
+    // const sign= await wallet.signTransaction(transaction);
 
-    ...Send to Alice to sign then send the transaction
-    await transaction.sign([signer]);
+    const signedtxn = await newtransaction.sign([signer]);
 
-    // console.log("Signed transaction", signed)
+    console.log("Signed transaction", signedtxn)
+    
+    // const txi = await connection.sendTransaction(newtransaction , {
+    //   skipPreflight: true,
+    //   maxRetries: 2
+    // });
+    // console.log(`https://solscan.io/tx/${txi}`, "txi");
 
-    const rawTransaction = transaction.serialize()
+    const rawTransaction = newtransaction.serialize();
+    console.log(rawTransaction, "raw txn")
     const txid = await connection.sendRawTransaction(rawTransaction, {
       skipPreflight: true,
       maxRetries: 2
@@ -138,7 +147,7 @@ const Test = () => {
 
   return (
     <div>
-
+      { wallet.connected ? <p>Connected</p> : <p>Not Connected</p>}
       <Button onClick={testing}>Test the Payment</Button>
 
     </div>
