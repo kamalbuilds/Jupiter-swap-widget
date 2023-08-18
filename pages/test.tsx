@@ -5,6 +5,7 @@ import bs58 from 'bs58';
 import { Button } from '@chakra-ui/react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { web3 } from '@project-serum/anchor';
+
 const Test = () => {
   const wallet = useWallet();
   console.log("Wallet", wallet);
@@ -133,16 +134,8 @@ const Test = () => {
     //   skipPreflight: true,
     //   maxRetries: 2
     // });
-    // console.log(`https://solscan.io/tx/${txi}`, "txi");
-
-    const rawTransaction = newtransaction.serialize();
-    console.log(rawTransaction, "raw txn")
-    const txid = await connection.sendRawTransaction(rawTransaction, {
-      skipPreflight: true,
-      maxRetries: 2,
-    });
-    await connection.confirmTransaction(txid);
-    console.log(`https://solscan.io/tx/${txid}`);
+    // await connection.confirmTransaction(txid);
+    // console.log(`https://solscan.io/tx/${txid}`);
   }
 
 

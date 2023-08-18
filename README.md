@@ -1,14 +1,14 @@
 ## Solana frontend started kit
 
-This template has everything you need to build a web3 app on Solana using the thirdweb SDK.
 
 ## Getting Started
 
-Create a project using this example:
-
-```bash
-npx thirdweb create --template next-typescript-solana-starter
 ```
+yarn install
+yarn run dev
+```
+
+
 
 You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
