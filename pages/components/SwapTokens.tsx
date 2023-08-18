@@ -77,23 +77,27 @@ const SwapTokens = ({ tokenList }: any) => {
 
     const [indexRouteMap, setIndexRoutemap] = useState();
 
-    const connection = new Connection('https://solana-devnet.g.alchemy.com/v2/QIb7Svucv2br6JObOnHw4GsPriYmdXYY');
+    const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/SW3uzyu7hPsAhI5878T7jffYghoOuDLk');
 
     const swapTokensOneAndTwo = () => {
         setTokenOne(tokenTwo);
         setTokenTwo(tokenOne);
     }
 
-    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
+    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || '')).publicKey;
 
-    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
+    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''))
 
     console.log("Signer", signer, wallets);
 
     const swapTokensData = async () => {
         if (tokenOneAmount) {
+            const decimalValue = Math.pow(10, tokenOne.decimals);
+            console.log(decimalValue, tokenOne.decimals)
+            const fixAmount = tokenOneAmount * decimalValue;
+
             //fetching data of the tokens
-            const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${tokenOneAmount}`;
+            const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
             const res = await fetch(tokenURL);
             const response = await res.json();
 

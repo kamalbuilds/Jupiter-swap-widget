@@ -115,7 +115,7 @@ const Swap = () => {
 
         const signed = transaction.sign([signer]);
 
-        console.log("Signed transaction", signed)
+        console.log("Signed transaction", signed); 
 
         const rawTransaction = transaction.serialize()
         const txid = await connection.sendRawTransaction(rawTransaction, {

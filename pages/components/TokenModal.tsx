@@ -29,12 +29,12 @@ const TokenModal = () => {
 
     return (
         <>
-            <Button onClick={handleOpenModal}>Open Modal</Button>
+            <Button onClick={handleOpenModal}>Swap with Jupiter</Button>
 
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Modal Title</ModalHeader>
+                    <ModalHeader>Efficiently Swap</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
                         <SwapTokens tokenList={tokenList} />
