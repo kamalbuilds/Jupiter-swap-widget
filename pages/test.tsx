@@ -1,5 +1,5 @@
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token'; // version 0.1.x
-import { AddressLookupTableAccount, Connection, Keypair, MessageV0, PublicKey, TransactionMessage, VersionedTransaction  } from '@solana/web3.js';
+import { AddressLookupTableAccount, Connection, Keypair, MessageV0, PublicKey, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import * as anchor from '@project-serum/anchor';
 import bs58 from 'bs58';
 import { Button } from '@chakra-ui/react';
@@ -29,7 +29,7 @@ const Test = () => {
   const recieverWallet = new PublicKey("Fu3MGReA4T5qLH9v2XuJWhK1SdacWzd7E8p6uLZcHcaR");
 
   // signer pvt key 
-  const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''));
+  const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''));
 
   const testing = async () => {
     // console.log(signer, 'sig')
@@ -54,7 +54,7 @@ const Test = () => {
           // route from /quote api
           route: route,
           userPublicKey: senderWallet, //here publicKey of the sender who is sending the transaction
-          computeUnitPriceMicroLamports : 1
+          computeUnitPriceMicroLamports: 1
         })
       })
     ).json();
@@ -99,7 +99,7 @@ const Test = () => {
         return new AddressLookupTableAccount({
           key: lookup.accountKey,
           state: AddressLookupTableAccount.deserialize(await connection.getAccountInfo(lookup.accountKey)
-          .then((res) => res.data)),
+            .then((res) => res.data)),
         });
       })
     );
@@ -119,17 +119,17 @@ const Test = () => {
     );
 
     console.log(message, "msg")
-    
+
     // compile the message and update the transaction
     const messagev0 = message.compileToV0Message(addressLookupTableAccounts);
-    const newtransaction = new web3.VersionedTransaction(messagev0 );
+    const newtransaction = new web3.VersionedTransaction(messagev0);
     // ...Send to Alice to sign then send the transaction
     // const sign= await wallet.signTransaction(transaction);
 
     const signedtxn = await newtransaction.sign([signer]);
 
     console.log("Signed transaction", signedtxn)
-    
+
     // const txi = await connection.sendTransaction(newtransaction , {
     //   skipPreflight: true,
     //   maxRetries: 2
@@ -141,7 +141,7 @@ const Test = () => {
 
   return (
     <div>
-      { wallet.connected ? <p>Connected</p> : <p>Not Connected</p>}
+      {wallet.connected ? <p>Connected</p> : <p>Not Connected</p>}
       <Button onClick={testing}>Pay to Merchant</Button>
 
     </div>

@@ -8,6 +8,9 @@ import Payments from "./components/Payments/Payments";
 import Swap from "./components/swap/swap";
 import Test from "./test";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 // Default styles that can be overridden by your app
 require("@solana/wallet-adapter-react-ui/styles.css");
 

@@ -46,20 +46,26 @@ const TokenList = ({
 
     return (
         <div className=''>
-            <Input placeholder='Search' size='md' onChange={handleChange} />
-            {listOfTokens.map((token: any) => {
-                return (
-                    <div onClick={() => handleTokenSelect(token)} key={token.address} className='flex items-center rounded-2xl p-4 cursor-pointer my-2 hover:bg-slate-400 hover:text-white'>
-                        <div className='leftTokenContainer mr-4'>
-                            <img src={token.logoURI} className='w-[50px]' />
+            <div className='p-4'>
+                <Input placeholder='Search for a token' size='md' onChange={handleChange} />
+
+            </div>
+            <div className='overflow-scroll h-[350px]'>
+                {listOfTokens.map((token: any) => {
+                    return (
+                        <div onClick={() => handleTokenSelect(token)} key={token.address}
+                            className='text-white flex items-center py-4 px-4 cursor-pointer my-2 hover:bg-[#486586] hover:text-white'>
+                            <div className='leftTokenContainer mr-4'>
+                                <img src={token.logoURI} className='w-[50px]' />
+                            </div>
+                            <div className='flex flex-col items-baseline'>
+                                <div className=''>{token.name}</div>
+                                <div>{token.symbol}</div>
+                            </div>
                         </div>
-                        <div className='flex flex-col items-baseline'>
-                            <div className=''>{token.name}</div>
-                            <div>{token.symbol}</div>
-                        </div>
-                    </div>
-                )
-            })}
+                    )
+                })}
+            </div>
         </div>
     );
 };

@@ -33,13 +33,12 @@ const TokenModal = () => {
 
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Efficiently Swap</ModalHeader>
-                    <ModalCloseButton />
+                <ModalContent bg='#494f5a' p='27px 10px' borderRadius='20px'>
+                    <ModalHeader color='#F7FAFC'>Efficiently Swap</ModalHeader>
+                    <ModalCloseButton color='#EDF2F7' fontSize='md' />
                     <ModalBody>
                         <SwapTokens tokenList={tokenList} />
                     </ModalBody>
-
                 </ModalContent>
             </Modal>
         </>

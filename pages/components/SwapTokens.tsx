@@ -2,6 +2,8 @@ import { Button, Input, InputGroup, InputLeftAddon, InputLeftElement, InputRight
 import React, { useEffect, useState } from 'react';
 import "../../styles/Home.module.css";
 import TokenList from './TokenList';
+import { useClickAway } from 'react-use';
+
 
 import { AiOutlineDown } from "react-icons/ai";
 import { MdSwapVerticalCircle } from "react-icons/md";
@@ -13,6 +15,8 @@ import fetch from 'cross-fetch';
 import { Wallet } from '@project-serum/anchor';
 import bs58 from 'bs58';
 import * as anchor from '@project-serum/anchor';
+import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 
 
@@ -20,11 +24,19 @@ const SwapTokens = ({ tokenList }: any) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure()
 
-    const [tokenOneAmount, setTokenOneAmount] = useState(0);
+    const [tokenOneAmount, setTokenOneAmount] = useState<number>(0);
     const [tokenTwoAmount, setTokenTwoAmount] = useState(0);
 
     const [tokenOne, setTokenOne] = useState(tokenList[0]);
     const [tokenTwo, setTokenTwo] = useState(tokenList[1]);
+
+    const [loading, setLoading] = useState(false);
+    const [tokenFocus, setTokenFocus] = useState(false);
+
+    // const [tokenOnePriceUSD, setTokenOnePriceUSD] = useState(0);
+    // const [tokenTwoPriceUSD, setTokenTwoPriceUSD] = useState(0);
+
+
     const [changeToken, setChangeToken] = useState(1);
 
     const openTokenModal = () => {
@@ -37,112 +49,139 @@ const SwapTokens = ({ tokenList }: any) => {
     }
 
 
-    const changeTokenOneAmount = (e: any) => {
-        setTokenOneAmount(e.target.value);
-        fetchTokenPrice(e.target.value);
-    }
+    const changeTokenOneAmount = (v: string) => {
+        const value = parseInt(v);
+        if (value <= 0 || v === '') {
+            setTokenTwoAmount(0);
+            setTokenOneAmount(value);
+            // setTokenOnePriceUSD(0);
+        } else {
+            const decimalValue = Math.pow(10, tokenOne.decimals);
+            console.log(decimalValue, tokenOne.decimals)
+            const fixAmount = value * decimalValue;
 
-    useEffect(() => {
-        if (tokenOneAmount) {
-            fetchTokenPrice(tokenOneAmount)
+            setTokenOneAmount(value);
+            fetchTokenPrice(fixAmount);
         }
-    }, [tokenOne, tokenTwo])
 
-    const fetchTokenPrice = async (amount: number) => {
 
-        const decimalValue = Math.pow(10, tokenOne.decimals);
-        console.log(decimalValue, tokenOne.decimals)
-        const fixAmount = amount * decimalValue;
-
-        console.log("fixAmount", fixAmount, decimalValue);
-
-        const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
-        const res = await fetch(tokenURL);
-        const response = await res.json();
-        console.log("Response", response)
-
-        const { data } = response;
-
-        const outputTokenPrice = data[0].outAmount;
-        const decimalOutputTokenValue = Math.pow(10, tokenTwo.decimals);
-        const totalOutputTokenValue = outputTokenPrice / decimalOutputTokenValue;
-        setTokenTwoAmount(totalOutputTokenValue);
     }
 
+    // const getUSDCPrice = async (id: string) => {
+    //     const baseURL = 'https://quote-api.jup.ag/v4/price?';
+    //     const url = baseURL + `ids=${id}`;
 
-    console.log("Token One 1111", tokenOne);
+    //     const response = await (await fetch(url)).json();
+    //     console.log("Token PRice in usdc", response);
 
-    console.log("tokenTwo 22222", tokenTwo)
+    //     const { data } = response;
+    //     const dataValues: any = Object.values(data);
+
+    //     const priceUsd = dataValues[0].price;
+    //     return priceUsd.toFixed(2);
+
+    // }
+
+    const fetchTokenPrice = async (fixAmount: number) => {
 
 
-    const [indexRouteMap, setIndexRoutemap] = useState();
+        try {
+
+            console.log("Fix Amount in token Price <><><><>", fixAmount)
+
+            console.log("fixAmount", fixAmount);
+
+            const tokenURL = `https://quote-api.jup.ag/v6/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
+
+            const res = await fetch(tokenURL);
+            const response = await res.json();
+            console.log("Response", response)
+
+            const outputTokenPrice = response.outAmount;
+            const decimalOutputTokenValue = Math.pow(10, tokenTwo.decimals);
+            const totalOutputTokenValue = (outputTokenPrice / decimalOutputTokenValue);
+            setTokenTwoAmount(totalOutputTokenValue);
+
+
+        } catch (error) {
+            setTokenTwoAmount(0);
+            console.log("Error", error);
+        }
+
+    }
+
 
     const connection = new Connection('https://solana-mainnet.g.alchemy.com/v2/SW3uzyu7hPsAhI5878T7jffYghoOuDLk');
 
     const swapTokensOneAndTwo = () => {
         setTokenOne(tokenTwo);
         setTokenTwo(tokenOne);
+
+        console.log("Change token called", tokenTwoAmount)
+        changeTokenOneAmount(tokenTwoAmount.toString());
     }
 
-    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || '')).publicKey;
+    const wallets = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || '')).publicKey;
 
-    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('' || ''))
+    const signer = anchor.web3.Keypair.fromSecretKey(bs58.decode('3SHjXLKm9QvDPJ3YLXtZcuwSSHEYFdQM7BaB34tS4s2L5XKXpMRYE59h4UJtEaFvX2v6vdaZvxtHrHSgZGn3r5jS' || ''))
 
-    console.log("Signer", signer, wallets);
+    console.log("Signer", signer, wallets, wallets.toBase58());
 
     const swapTokensData = async () => {
         if (tokenOneAmount) {
-            const decimalValue = Math.pow(10, tokenOne.decimals);
-            console.log(decimalValue, tokenOne.decimals)
-            const fixAmount = tokenOneAmount * decimalValue;
+            setLoading(true);
+            try {
+                const decimalValue = Math.pow(10, tokenOne.decimals);
+                console.log(decimalValue, tokenOne.decimals)
+                const fixAmount = tokenOneAmount * decimalValue;
 
-            //fetching data of the tokens
-            const tokenURL = `https://quote-api.jup.ag/v4/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
-            const res = await fetch(tokenURL);
-            const response = await res.json();
+                //fetching data of the tokens
+                const tokenURL = `https://quote-api.jup.ag/v6/quote?inputMint=${tokenOne.address}&outputMint=${tokenTwo.address}&amount=${fixAmount}`;
 
-            const { data } = response;
+                const res = await fetch(tokenURL);
+                const response = await res.json();
 
-            console.log("Response", response, data);
+                console.log('response', response);
 
-            //swapping tokens
-            const alltransactions = await (
-                await fetch('https://quote-api.jup.ag/v4/swap', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        // route from /quote api
-                        route: data[0],
-                        userPublicKey: wallets.toBase58(),
+                //swapping tokens
+                const alltransactions = await (
+                    await fetch('https://quote-api.jup.ag/v6/swap', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            quoteResponse: response,
+                            userPublicKey: wallets.toBase58(),
+                        })
                     })
-                })
-            ).json();
-            const {
-                swapTransaction,
-                setupTransaction,
-                cleanupTransaction,
-            } = alltransactions;
+                ).json();
+                const {
+                    swapTransaction,
+                } = alltransactions;
 
-            console.log("Swap transactions", swapTransaction, alltransactions);
+                console.log("Swap transactions", swapTransaction);
 
-            const transactionBuf = Buffer.from(swapTransaction, 'base64');
-            var transaction = VersionedTransaction.deserialize(transactionBuf);
+                const transactionBuf = Buffer.from(swapTransaction, 'base64');
+                var transaction = VersionedTransaction.deserialize(transactionBuf);
 
-            console.log(transaction, "sign txn start");
+                const signed = transaction.sign([signer]);
 
-            const signed = transaction.sign([signer]);
+                console.log("Signed transaction", signed)
 
-            console.log("Signed transaction", signed)
+                const rawTransaction = transaction.serialize()
+                const txid = await connection.sendRawTransaction(rawTransaction, {
+                    skipPreflight: true,
+                    maxRetries: 2
+                });
+                await connection.confirmTransaction(txid);
+                console.log(`https://solscan.io/tx/${txid}`);
+            } catch (error) {
+                console.log("Error", error);
+            }
 
-            const rawTransaction = transaction.serialize()
-            const txid = await connection.sendRawTransaction(rawTransaction, {
-                skipPreflight: true,
-                maxRetries: 2
-            });
-            await connection.confirmTransaction(txid);
-            console.log(`https://solscan.io/tx/${txid}`);
+
+            setLoading(false);
 
         }
 
@@ -151,15 +190,24 @@ const SwapTokens = ({ tokenList }: any) => {
 
     }
 
+    const handleClick = () => {
+        console.log("clicked");
+        setTokenFocus(true);
+    }
+
+    const containerRef = React.useRef(null);
+    useClickAway(containerRef, () => setTokenFocus(false));
+
     return (
-        <div>
+        <div ref={containerRef}>
 
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
-                <ModalContent style={{ height: '500px' }}>
-                    <ModalHeader>Modal Title</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody className='overflow-scroll'>
+                <ModalContent bg='#304256' borderRadius='20px' style={{ height: '500px' }}>
+                    <ModalHeader color='#FFF'>Select Token</ModalHeader>
+
+                    <ModalCloseButton color='#FFF' fontSize='md' />
+                    <ModalBody p={0}>
                         <TokenList
                             tokenList={tokenList}
                             changeToken={changeToken}
@@ -169,45 +217,87 @@ const SwapTokens = ({ tokenList }: any) => {
                             setTokenTwo={setTokenTwo}
                             onClose={onClose} />
                     </ModalBody>
-
-                    <ModalFooter>
-                        <Button colorScheme='blue' mr={3} onClick={onClose}>
-                            Close
-                        </Button>
-                        <Button variant='ghost'>Secondary Action</Button>
-                    </ModalFooter>
                 </ModalContent>
             </Modal>
 
-            <InputGroup height='55px' mb='10px'>
-                <InputLeftAddon height='100%' onClick={() => openModal(1)} className='cursor-pointer' >
-                    <div className='flex items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
-                        {tokenOne && tokenOne.symbol}
-                        <AiOutlineDown />
-                    </div>
-                </InputLeftAddon>
-                <Input type='number' height='100%' placeholder='0' onChange={(e) => changeTokenOneAmount(e)} />
-            </InputGroup>
+            {loading && <>
+                Loading...</>}
 
-            <div className='flex justify-center'>
-                <MdSwapVerticalCircle size='40px' onClick={swapTokensOneAndTwo} />
+            <div style={
+                {
+                    boxShadow: tokenFocus ? '1px 0px 15px 3px #5cb9bc' : 'none'
+                }
+            } className='bg-[#373f4c] rounded-lg px-3 py-4 my-[20px]'>
+                <div className='flex '>
+                    <div onClick={() => openModal(1)} className='cursor-pointer'>
+                        <div className='flex gap-1 items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
+                            <Image className='rounded-3xl' src={tokenOne.logoURI} alt={tokenOne.name} width={30} height={30} />
+                            {tokenOne && tokenOne.symbol}
+                            <AiOutlineDown />
+                        </div>
+                    </div>
+
+                    <span className='flex-1 flex flex-col justify-center items-end'>
+                        <div className='text-slate-500 text-[12px] font-bold'>You pay</div>
+                        <div className='w-full'>
+                            <input
+                                onClick={handleClick}
+                                className='text-[18px] text-slate-300 focus-visible:shadow-none focus-visible:outline-0 text-end bg-transparent w-full'
+                                type='number'
+                                height='100%'
+                                placeholder='0'
+                                value={tokenOneAmount}
+                                onChange={(e) => changeTokenOneAmount(e.target.value)}
+                            />
+                        </div>
+                        {/* <div className='text-slate-500 text-[12px] font-bold'>
+                            ${
+                                tokenOneAmount ? (tokenOnePriceUSD * tokenOneAmount).toFixed(2) : 0
+                            }
+
+                        </div> */}
+                    </span>
+                </div>
             </div>
 
-            <InputGroup height='55px' mt='10px'>
-                <InputLeftAddon height='100%' onClick={() => openModal(2)} className='cursor-pointer' >
-                    <div className='flex items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
-                        {tokenTwo && tokenTwo.symbol}
-                        <AiOutlineDown />
+            <div className='  flex justify-center'>
+                <div className='rounded-full hover:shadow-lg hover:shadow-cyan-500/50 hover:bg-[#5cb9bc]'>
+                    <MdSwapVerticalCircle size='40px' onClick={swapTokensOneAndTwo} />
+                </div>
+            </div>
+
+            <div className='bg-[#373f4c] cursor-not-allowed rounded-lg px-3 py-4 my-[20px]'>
+                <div className='flex '>
+
+                    <div onClick={() => openModal(2)} className='cursor-pointer'>
+                        <div className='flex gap-1 items-center text-white rounded-xl bg-slate-500 px-3 py-2'>
+                            <Image className='rounded-3xl' src={tokenTwo.logoURI} alt={tokenTwo.name} width={30} height={30} />
+                            {tokenTwo && tokenTwo.symbol}
+                            <AiOutlineDown />
+                        </div>
                     </div>
-                </InputLeftAddon>
-                <Input
-                    value={tokenTwoAmount}
-                    disabled={true} type='number' height='100%' placeholder='0' />
-            </InputGroup>
+
+                    <span className='flex-1 flex flex-col justify-center items-end'>
+                        <div className='text-slate-500 text-[12px] font-bold'>You get</div>
+                        <div className='w-full'>
+                            <input
+                                className='text-[18px] text-slate-300 focus-visible:shadow-none focus-visible:outline-0 text-end bg-transparent w-full'
+                                type='number'
+                                height='100%'
+                                placeholder='0'
+                                value={tokenTwoAmount}
+                                disabled={true}
+                            />
+                        </div>
+                        {/* <div className='text-slate-500 text-[12px] font-bold'>${(tokenTwoPriceUSD * tokenTwoAmount).toFixed(2)}</div> */}
+                    </span>
+                </div>
+            </div>
 
 
-            <div className='my-3'>
+            <div className='my-[40px]'>
                 <Button
+                    height='50px'
                     width='100%'
                     colorScheme='blue'
                     mr={3}
