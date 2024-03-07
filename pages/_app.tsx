@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 
 
 // Change the network to the one you want to use: "mainnet-beta", "testnet", "devnet", "localhost" or your own RPC endpoint
+// Refresh once if you get any error 
 const network: Network = "devnet";
 
 function MyApp({ Component, pageProps }: AppProps) {
